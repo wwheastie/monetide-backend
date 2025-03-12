@@ -1,8 +1,4 @@
-package org.example.monetide;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Set;
+package org.example.monetide.packaging;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +9,8 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+
+import java.util.Set;
 
 @RestController()
 public class FileUploadController {

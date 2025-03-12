@@ -30,8 +30,13 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'software.amazon.awssdk:s3:2.27.21'
+    implementation 'org.apache.poi:poi:5.4.0'
+    implementation 'org.apache.poi:poi-ooxml:5.4.0'
+    implementation 'cn.afterturn:easypoi-base:4.5.0'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
+    implementation 'com.opencsv:opencsv:5.10'
 }
 
 tasks.named('test') {
-    useTestNG()
+    useJUnitPlatform()
 }

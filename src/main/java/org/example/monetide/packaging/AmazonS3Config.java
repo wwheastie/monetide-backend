@@ -1,7 +1,6 @@
-package org.example.monetide;
+package org.example.monetide.packaging;
 
 import java.net.URI;
-import java.nio.file.Paths;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,7 +9,6 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @Configuration
 public class AmazonS3Config {
