@@ -1,5 +1,8 @@
 package org.example.monetide.uplift;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvCustomBindByName;
 import lombok.Getter;
@@ -8,21 +11,36 @@ import java.time.Instant;
 
 @Getter
 public class CustomerData {
-    @CsvCustomBindByName(column = "Contract Monthly Recurring Revenue (converted)", converter = CurrencyConverter.class)
-    private Double monthlyRecurringRevenue;
-
-    @CsvCustomBindByName(column = "Previous Months Value (converted)", converter = CurrencyConverter.class)
-    private Double previousMonthlyRecurringRevenue;
-
-    @CsvCustomBindByName(column = "First Subscription Date", converter = DateConverter.class)
-    private Instant initialSubscriptionDate;
-
-    @CsvCustomBindByName(column = "Total Logins (90-Days)", converter = IntegerConverter.class)
-    private Integer logins;
-
     @CsvBindByName(column = "Account Name")
+    @JsonProperty("Customer")
     private String accountName;
 
+    @CsvCustomBindByName(column = "Contract Monthly Recurring Revenue (converted)", converter = CurrencyConverter.class)
+    @JsonProperty("MRR")
+    private Double monthlyRecurringRevenue;
+
+    @CsvBindByName(column = "Segment")
+    @JsonProperty("Plan")
+    private String segment;
+
+    @CsvCustomBindByName(column = "First Subscription Date", converter = DateConverter.class)
+    @JsonProperty("Initial Subscription")
+    @JsonSerialize(using = InstantToShortDateSerializer.class)
+    private Instant initialSubscriptionDate;
+
+    @CsvCustomBindByName(column = "Previous Months Value (converted)", converter = CurrencyConverter.class)
+    @JsonIgnore
+    private Double previousMonthlyRecurringRevenue;
+
+    @CsvCustomBindByName(column = "Total Logins (90-Days)", converter = IntegerConverter.class)
+    @JsonIgnore
+    private Integer logins;
+
+    @CsvCustomBindByName(column = "# of Users", converter = IntegerConverter.class)
+    @JsonIgnore
+    private Integer numberOfUsers;
+
+    @JsonIgnore
     public Double getEngagementCostRatio() {
         if (monthlyRecurringRevenue == 0) {
             return Double.MAX_VALUE;
