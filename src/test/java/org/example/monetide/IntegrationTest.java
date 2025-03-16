@@ -1,9 +1,9 @@
 package org.example.monetide;
 
-import org.example.monetide.uplift.CohortService;
-import org.example.monetide.uplift.CsvService;
-import org.example.monetide.uplift.CustomerData;
-import org.example.monetide.uplift.EligibilityService;
+import org.example.monetide.uplift.service.CohortService;
+import org.example.monetide.uplift.service.CsvService;
+import org.example.monetide.uplift.domain.CustomerData;
+import org.example.monetide.uplift.service.EligibilityService;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;

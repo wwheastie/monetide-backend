@@ -1,4 +1,4 @@
-package org.example.monetide.uplift;
+package org.example.monetide.uplift.converter;
 
 import com.opencsv.bean.AbstractBeanField;
 import org.apache.commons.lang3.StringUtils;

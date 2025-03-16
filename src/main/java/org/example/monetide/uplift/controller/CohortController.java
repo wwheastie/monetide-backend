@@ -1,5 +1,12 @@
-package org.example.monetide.uplift;
+package org.example.monetide.uplift.controller;
 
+import org.example.monetide.uplift.domain.Cohort;
+import org.example.monetide.uplift.domain.CohortsResponse;
+import org.example.monetide.uplift.domain.CustomerData;
+import org.example.monetide.uplift.service.CohortService;
+import org.example.monetide.uplift.service.CsvService;
+import org.example.monetide.uplift.service.EligibilityService;
+import org.example.monetide.uplift.service.FileService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,13 +32,13 @@ public class CohortController {
     }
 
     @PostMapping("/api/v1/customer/{customerId}/cohorts")
-    public ResponseEntity<GetCohortsResponse> getCohorts(@PathVariable String customerId,
-                                                                      @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<CohortsResponse> getCohorts(@PathVariable String customerId,
+                                                      @RequestParam("file") MultipartFile file) {
         InputStream inputStream = fileService.getInputStream(file);
         List<CustomerData> customerDataList = csvService.convert(inputStream);
         List<CustomerData> eligibleCustomers = eligibilityService.eligibleCustomers(customerDataList);
         List<Cohort> cohorts = cohortService.groupCustomersByCohort(eligibleCustomers);
-        GetCohortsResponse response = GetCohortsResponse.builder().cohorts(cohorts).build();
+        CohortsResponse response = CohortsResponse.builder().cohorts(cohorts).build();
         return ResponseEntity.ok(response);
     }
 }

@@ -1,4 +1,4 @@
-package org.example.monetide.uplift;
+package org.example.monetide.uplift.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,6 +6,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvCustomBindByName;
 import lombok.Getter;
+import org.example.monetide.uplift.converter.CurrencyConverter;
+import org.example.monetide.uplift.converter.DateConverter;
+import org.example.monetide.uplift.converter.IntegerConverter;
+import org.example.monetide.uplift.serializer.InstantToShortDateSerializer;
 
 import java.time.Instant;
 

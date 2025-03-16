@@ -1,5 +1,6 @@
-package org.example.monetide.uplift;
+package org.example.monetide.uplift.service;
 
+import org.example.monetide.uplift.domain.CustomerData;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;

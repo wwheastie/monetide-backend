@@ -1,7 +1,8 @@
-package org.example.monetide.uplift;
+package org.example.monetide.uplift.service;
 
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
+import org.example.monetide.uplift.domain.CustomerData;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;

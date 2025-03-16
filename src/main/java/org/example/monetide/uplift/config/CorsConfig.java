@@ -1,4 +1,4 @@
-package org.example.monetide.uplift;
+package org.example.monetide.uplift.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package org.example.monetide.uplift;
+package org.example.monetide.uplift.domain;
 
 import lombok.Builder;
 import lombok.Data;
