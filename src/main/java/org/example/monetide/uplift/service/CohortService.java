@@ -13,9 +13,11 @@ public class CohortService {
     private static final String MID_SEGMENT = "Mid";
 
     public List<Cohort> groupCustomersByCohort(List<CustomerData> customerData) {
-        return Arrays.asList(groupHighUsageLowPricedCustomers(customerData),
+        return Arrays.asList(
+                groupHighUsageLowPricedCustomers(customerData),
                 groupEnterpriseCustomersLegacyPricing(customerData),
-                groupMidTierCustomersWithExpansionPotential(customerData));
+                groupMidTierCustomersWithExpansionPotential(customerData)
+        );
     }
 
     private Cohort groupMidTierCustomersWithExpansionPotential(List<CustomerData> customerData) {
