@@ -13,11 +13,35 @@ public class CohortService {
     private static final String MID_SEGMENT = "Mid";
 
     public List<Cohort> groupCustomersByCohort(List<CustomerData> customerData) {
-        return Arrays.asList(
+        List<Cohort> cohorts = Arrays.asList(
                 groupHighUsageLowPricedCustomers(customerData),
                 groupEnterpriseCustomersLegacyPricing(customerData),
-                groupMidTierCustomersWithExpansionPotential(customerData)
+                groupMidTierCustomersWithExpansionPotential(customerData),
+                groupPriceSensitiveLowUsageCustomers(customerData)
         );
+
+        calculateUniqueCustomerCount(cohorts);
+
+        return cohorts;
+    }
+
+    private void calculateUniqueCustomerCount(List<Cohort> cohorts) {
+        for (int i = 0; i < cohorts.size(); i++) {
+            Cohort cohort = cohorts.get(i);
+            Set<CustomerData> currentCustomerDataSet = new HashSet<>(cohort.getCustomers());
+
+            Set<CustomerData> otherElements = new HashSet<>();
+            for (int j = 0; j < cohorts.size(); j++) {
+                if (i != j) {
+                    otherElements.addAll(cohorts.get(j).getCustomers());
+                }
+            }
+
+            Set<CustomerData> uniqueToCurrent = new HashSet<>(currentCustomerDataSet);
+            uniqueToCurrent.removeAll(otherElements);
+
+            cohort.setUniqueCustomerCount(uniqueToCurrent.size());
+        }
     }
 
     private Cohort groupMidTierCustomersWithExpansionPotential(List<CustomerData> customerData) {
@@ -35,7 +59,33 @@ public class CohortService {
     }
 
     private Cohort groupPriceSensitiveLowUsageCustomers(List<CustomerData> customerData) {
-        return null;
+        List<CustomerData> monthlyCustomers = customerData.stream()
+                .filter(data -> "Monthly".equals(data.getBillingFrequency()))
+                .sorted(Comparator.comparing(CustomerData::getLogins))
+                .toList();
+        HashSet<CustomerData> monthlyCustomerSet = new HashSet<>(monthlyCustomers);
+
+        List<CustomerData> bottomHalfOfLogins = getBottomHalfOfLogins(customerData);
+
+        List<CustomerData> priceSensitiveCustomers = bottomHalfOfLogins.stream()
+                .filter(monthlyCustomerSet::contains)
+                .toList();
+
+        return Cohort.builder()
+                .name("Price Sensitive Low Usage")
+                .description("Test messaging here with this cohort - there likely isn't a ton of value on uplifting " +
+                        "them other than testing out messaging prior to sending to the more valuable customers.")
+                .customers(priceSensitiveCustomers)
+                .build();
+    }
+
+    private List<CustomerData> getBottomHalfOfLogins(List<CustomerData> customerData) {
+        int median = customerData.size() / 2;
+
+        return customerData.stream()
+                .sorted(Comparator.comparing(CustomerData::getLogins))
+                .toList()
+                .subList(0, median);
     }
 
     private Cohort groupEnterpriseCustomersLegacyPricing(List<CustomerData> customerData) {

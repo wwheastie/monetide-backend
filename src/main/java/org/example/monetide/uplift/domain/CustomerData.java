@@ -36,6 +36,10 @@ public class CustomerData {
     @JsonIgnore
     private Double previousMonthlyRecurringRevenue;
 
+    @CsvBindByName(column = "Billing Frequency")
+    @JsonIgnore
+    private String billingFrequency;
+
     @CsvCustomBindByName(column = "Total Logins (90-Days)", converter = IntegerConverter.class)
     @JsonIgnore
     private Integer logins;
