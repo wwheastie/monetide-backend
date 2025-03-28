@@ -1,30 +1,45 @@
 package org.example.monetide;
 
-import org.example.monetide.packaging.ExcelToCSVConverter;
+import com.opencsv.bean.StatefulBeanToCsv;
+import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import org.example.monetide.uplift.domain.Cohort;
+import org.example.monetide.uplift.domain.CustomerData;
+import org.example.monetide.uplift.service.CohortService;
+import org.example.monetide.uplift.service.CsvService;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.InputStream;
+import java.io.Writer;
+import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ExcelToCSVConverterTest {
-
-
     @Test
     public void test() {
         // Arrange
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("sample.xlsx");
-        ExcelToCSVConverter converter = new ExcelToCSVConverter();
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("customer-data.csv");
+        CsvService csvService = new CsvService();
+        List<CustomerData> customerDataList = csvService.convert(inputStream);
+        CohortService cohortService = new CohortService();
+        List<Cohort> cohorts = cohortService.groupCustomersByCohort(customerDataList);
 
-        // ACT
-        converter.convert(inputStream);
+        // Get Downloads folder (user home + Downloads)
+        String downloadsPath = Paths.get(System.getProperty("user.home"), "Downloads").toString();
 
-        // Assert
-        Map<String, List<String>> csvFiles = converter.getCsvFiles();
-        assertNotNull(converter.getAllDocumentIds());
-//        assertEquals(4, csvFiles.size());
-        assertNotNull(csvFiles);
+        // Write each dataset to a separate CSV file
+        for (Cohort cohort : cohorts) {
+            String fileName = cohort.getName() + ".csv";
+            File file = new File(downloadsPath, fileName);
+
+            try (Writer writer = new FileWriter(file)) {
+                StatefulBeanToCsv<CustomerData> beanToCsv = new StatefulBeanToCsvBuilder<CustomerData>(writer).build();
+                beanToCsv.write(cohort.getCustomers());
+                System.out.println("Written to: " + file.getAbsolutePath());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

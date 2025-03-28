@@ -10,13 +10,11 @@ import java.time.format.DateTimeFormatter;
 public class DateConverter extends AbstractBeanField<Instant, String> {
     @Override
     protected Instant convert(String value) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/yy");
         LocalDate localDate = LocalDate.parse(value, formatter);
         return localDate.atStartOfDay().atZone(java.time.ZoneId.systemDefault()).toInstant();
-    }
-
-    private String getDateFormat(String value) {
-        int count = StringUtils.substringBefore(value, "/").length();
-        return count == 1 ? "M/dd/yy" : "MM/dd/yy";
     }
 }
