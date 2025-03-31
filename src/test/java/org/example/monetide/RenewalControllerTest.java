@@ -22,6 +22,6 @@ public class RenewalControllerTest {
     public void test() {
         UUID clientId = UUID.randomUUID();
         TestUtility.getCohorts(clientId, cache);
-        controller.getRenewals(clientId);
+        controller.getRenewals(clientId, null);
     }
 }

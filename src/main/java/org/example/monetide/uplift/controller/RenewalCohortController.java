@@ -1,18 +1,15 @@
 package org.example.monetide.uplift.controller;
 
 import com.github.benmanes.caffeine.cache.Cache;
-import org.example.monetide.uplift.domain.Cohort;
-import org.example.monetide.uplift.domain.CustomerData;
-import org.example.monetide.uplift.domain.RenewalCohort;
-import org.example.monetide.uplift.domain.RenewalCohortsResponse;
+import org.example.monetide.uplift.domain.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -34,7 +31,7 @@ public class RenewalCohortController {
     }
 
     @PostMapping("/api/v1/customer/{customerId}/renewals")
-    public ResponseEntity<RenewalCohortsResponse> getRenewals(@PathVariable UUID customerId) {
+    public ResponseEntity<RenewalCohortsResponse> getRenewals(@PathVariable UUID customerId, @RequestBody RenewalCohortsRequest request) {
         List<Cohort> cohorts = cache.getIfPresent(UUID.fromString(customerId.toString()));
 
         if (cohorts == null) {
@@ -43,7 +40,7 @@ public class RenewalCohortController {
 
         Map<YearMonth, List<CustomerData>> yearMonthCustomerData = cohorts.stream()
                 .flatMap(cohort -> cohort.getCustomers().stream())
-                .filter(this::isGreaterThanOrEqualNoticeDate)
+                .filter(customerData -> isGreaterThanOrEqualNoticeDate(customerData, request))
                 .collect(Collectors.groupingBy(
                         customer -> YearMonth.from(customer.getRenewalDate()
                                 .atZone(ZoneId.of("UTC")))
@@ -63,14 +60,12 @@ public class RenewalCohortController {
         return ResponseEntity.ok(response);
     }
 
-    private boolean isGreaterThanOrEqualNoticeDate(CustomerData customerData) {
-        return customerData.getRenewalDate() != null &&
-                (customerData.getRenewalDate().isAfter(getDate()) || customerData.getRenewalDate().equals(getDate()));
-    }
+    private boolean isGreaterThanOrEqualNoticeDate(CustomerData customerData, RenewalCohortsRequest request) {
+        Instant instateDate = request.getNoticeSentDate().atStartOfDay(ZoneId.of("UTC")).toInstant();
+        Instant date = instateDate.plus(request.getDaysOfNotice(), ChronoUnit.DAYS);
 
-    private Instant getDate() {
-        Instant date = LocalDateTime.of(2025, 4, 11, 0, 0).atZone(ZoneId.of("UTC")).toInstant();
-        return date.plus(15, ChronoUnit.DAYS);
+        return customerData.getRenewalDate() != null &&
+                (customerData.getRenewalDate().isAfter(date) || customerData.getRenewalDate().equals(date));
     }
 
     private RenewalCohort createRenewalCohort(Map.Entry<YearMonth, List<CustomerData>> entry) {
