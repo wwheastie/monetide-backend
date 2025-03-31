@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.Writer;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 
 public class ExcelToCSVConverterTest {
     @Test
@@ -22,8 +23,8 @@ public class ExcelToCSVConverterTest {
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("customer-data.csv");
         CsvService csvService = new CsvService();
         List<CustomerData> customerDataList = csvService.convert(inputStream);
-        CohortService cohortService = new CohortService();
-        List<Cohort> cohorts = cohortService.groupCustomersByCohort(customerDataList);
+        CohortService cohortService = new CohortService(null);
+        List<Cohort> cohorts = cohortService.groupCustomersByCohort(UUID.randomUUID(), customerDataList);
 
         // Get Downloads folder (user home + Downloads)
         String downloadsPath = Paths.get(System.getProperty("user.home"), "Downloads").toString();

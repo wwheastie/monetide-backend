@@ -48,6 +48,10 @@ public class CustomerData {
     @JsonIgnore
     private Integer numberOfUsers;
 
+    @CsvCustomBindByName(column = "Managed Renewal Date", converter = DateConverter.class)
+    @JsonIgnore
+    private Instant renewalDate;
+
     @JsonIgnore
     public Double getEngagementCostRatio() {
         if (monthlyRecurringRevenue == 0) {

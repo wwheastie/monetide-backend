@@ -1,7 +1,9 @@
 package org.example.monetide.uplift.service;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import org.example.monetide.uplift.domain.Cohort;
 import org.example.monetide.uplift.domain.CustomerData;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -12,7 +14,13 @@ public class CohortService {
     private static final String ENTERPRISE_CUSTOMER = "Enterprise";
     private static final String MID_SEGMENT = "Mid";
 
-    public List<Cohort> groupCustomersByCohort(List<CustomerData> customerData) {
+    private final Cache<UUID, List<Cohort>> cache;
+
+    public CohortService(@Qualifier("clientCohortsCache") Cache<UUID, List<Cohort>> cache) {
+        this.cache = cache;
+    }
+
+    public List<Cohort> groupCustomersByCohort(UUID customerId, List<CustomerData> customerData) {
         List<Cohort> cohorts = Arrays.asList(
                 groupHighUsageLowPricedCustomers(customerData),
                 groupEnterpriseCustomersLegacyPricing(customerData),
@@ -21,6 +29,8 @@ public class CohortService {
         );
 
         calculateUniqueCustomerCount(cohorts);
+
+        cache.put(customerId, cohorts);
 
         return cohorts;
     }

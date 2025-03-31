@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 public class CohortController {
@@ -32,12 +33,12 @@ public class CohortController {
     }
 
     @PostMapping("/api/v1/customer/{customerId}/cohorts")
-    public ResponseEntity<CohortsResponse> getCohorts(@PathVariable String customerId,
+    public ResponseEntity<CohortsResponse> getCohorts(@PathVariable UUID customerId,
                                                       @RequestParam("file") MultipartFile file) {
         InputStream inputStream = fileService.getInputStream(file);
         List<CustomerData> customerDataList = csvService.convert(inputStream);
         List<CustomerData> eligibleCustomers = eligibilityService.eligibleCustomers(customerDataList);
-        List<Cohort> cohorts = cohortService.groupCustomersByCohort(eligibleCustomers);
+        List<Cohort> cohorts = cohortService.groupCustomersByCohort(customerId, eligibleCustomers);
         CohortsResponse response = CohortsResponse.builder().cohorts(cohorts).build();
         return ResponseEntity.ok(response);
     }

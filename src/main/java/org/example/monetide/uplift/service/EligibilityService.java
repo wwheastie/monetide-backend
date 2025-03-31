@@ -11,6 +11,7 @@ import java.util.List;
 public class EligibilityService {
     public List<CustomerData> eligibleCustomers(List<CustomerData> customers) {
         return customers.stream()
+                .filter(this::isNotMissingCriticalData)
                 .filter(this::hasNoRecentPriceChange)
                 .filter(this::hasSubscriptionOverOneYear)
                 .toList();
@@ -26,5 +27,14 @@ public class EligibilityService {
         Instant now = Instant.now();
         Duration duration = Duration.between(customerData.getInitialSubscriptionDate(), now);
         return duration.toDays() > 365;
+    }
+
+    private boolean isNotMissingCriticalData(CustomerData customerData) {
+        if (customerData.getInitialSubscriptionDate() == null) {
+            System.out.println("Customer has no initial subscription date: " + customerData.getAccountName());
+            return false;
+        }
+
+        return true;
     }
 }
