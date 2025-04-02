@@ -16,10 +16,10 @@ import java.util.Objects;
 public class LoginController {
     private final RestTemplate restTemplate;
 
-    @Value("${supabase.api.key}")
-    private String apiKey;
+    private final String apiKey;
 
-    public LoginController() {
+    public LoginController(@Value("${supabase.api.key}") String apiKey) {
+        this.apiKey = apiKey;
         restTemplate = new RestTemplate();
     }
 
