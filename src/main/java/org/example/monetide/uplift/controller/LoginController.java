@@ -4,7 +4,6 @@ import org.example.monetide.uplift.domain.Login;
 import org.example.monetide.uplift.domain.LoginResponse;
 import org.example.monetide.uplift.domain.SupabaseLoginResponse;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,7 +13,6 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Objects;
 
 @RestController
-@PropertySource("classpath:application-secrets.properties")
 public class LoginController {
     private final RestTemplate restTemplate;
 
