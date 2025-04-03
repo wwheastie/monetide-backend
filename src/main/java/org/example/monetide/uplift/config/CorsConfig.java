@@ -12,8 +12,8 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")  // Allow all endpoints
-                        .allowedOrigins("http://localhost:5173") // Change to your frontend URL
+                registry.addMapping("/**")
+                        .allowedOrigins("http://localhost:5173", "https://monetide-frontend.onrender.com")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
