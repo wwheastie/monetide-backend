@@ -10,6 +10,7 @@ import java.util.List;
 public class Cohort {
     private String name;
     private String description;
+    private String shortDescription;
     private List<CustomerData> customers;
     private Integer uniqueCustomerCount;
 }
