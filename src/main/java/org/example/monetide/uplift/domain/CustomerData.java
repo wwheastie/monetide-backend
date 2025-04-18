@@ -59,6 +59,4 @@ public class CustomerData {
         }
         return logins / monthlyRecurringRevenue;
     }
-
-//    private String cohortName;
 }
