@@ -13,5 +13,5 @@ public class RenewalCohort {
     @JsonIgnore
     private YearMonth yearMonth;
     private String name;
-    private List<CustomerData> customers;
+    private List<Customer> customers;
 }

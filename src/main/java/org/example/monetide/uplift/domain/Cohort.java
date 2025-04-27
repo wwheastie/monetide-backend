@@ -11,6 +11,6 @@ public class Cohort {
     private String name;
     private String description;
     private String shortDescription;
-    private List<CustomerData> customers;
+    private List<Customer> customers;
     private Integer uniqueCustomerCount;
 }

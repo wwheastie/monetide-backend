@@ -3,7 +3,7 @@ package org.example.monetide;
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import org.example.monetide.uplift.domain.Cohort;
-import org.example.monetide.uplift.domain.CustomerData;
+import org.example.monetide.uplift.domain.Customer;
 import org.example.monetide.uplift.service.CohortService;
 import org.example.monetide.uplift.service.CsvService;
 import org.junit.jupiter.api.Test;
@@ -22,9 +22,9 @@ public class ExcelToCSVConverterTest {
         // Arrange
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("customer-data.csv");
         CsvService csvService = new CsvService();
-        List<CustomerData> customerDataList = csvService.convert(inputStream);
+        List<Customer> customerList = csvService.convert(inputStream);
         CohortService cohortService = new CohortService(null);
-        List<Cohort> cohorts = cohortService.groupCustomersByCohort(UUID.randomUUID(), customerDataList);
+        List<Cohort> cohorts = cohortService.groupCustomersByCohort(UUID.randomUUID(), customerList);
 
         // Get Downloads folder (user home + Downloads)
         String downloadsPath = Paths.get(System.getProperty("user.home"), "Downloads").toString();
@@ -35,7 +35,7 @@ public class ExcelToCSVConverterTest {
             File file = new File(downloadsPath, fileName);
 
             try (Writer writer = new FileWriter(file)) {
-                StatefulBeanToCsv<CustomerData> beanToCsv = new StatefulBeanToCsvBuilder<CustomerData>(writer).build();
+                StatefulBeanToCsv<Customer> beanToCsv = new StatefulBeanToCsvBuilder<Customer>(writer).build();
                 beanToCsv.write(cohort.getCustomers());
                 System.out.println("Written to: " + file.getAbsolutePath());
             } catch (Exception e) {

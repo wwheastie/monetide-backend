@@ -2,7 +2,7 @@ package org.example.monetide.uplift.controller;
 
 import org.example.monetide.uplift.domain.Cohort;
 import org.example.monetide.uplift.domain.CohortsResponse;
-import org.example.monetide.uplift.domain.CustomerData;
+import org.example.monetide.uplift.domain.Customer;
 import org.example.monetide.uplift.service.CohortService;
 import org.example.monetide.uplift.service.CsvService;
 import org.example.monetide.uplift.service.EligibilityService;
@@ -36,8 +36,8 @@ public class CohortController {
     public ResponseEntity<CohortsResponse> getCohorts(@PathVariable UUID customerId,
                                                       @RequestParam("file") MultipartFile file) {
         InputStream inputStream = fileService.getInputStream(file);
-        List<CustomerData> customerDataList = csvService.convert(inputStream);
-        List<CustomerData> eligibleCustomers = eligibilityService.eligibleCustomers(customerDataList);
+        List<Customer> customerList = csvService.convert(inputStream);
+        List<Customer> eligibleCustomers = eligibilityService.eligibleCustomers(customerList);
         List<Cohort> cohorts = cohortService.groupCustomersByCohort(customerId, eligibleCustomers);
         CohortsResponse response = CohortsResponse.builder().cohorts(cohorts).build();
         return ResponseEntity.ok(response);

@@ -1,6 +1,6 @@
 package org.example.monetide.uplift.service;
 
-import org.example.monetide.uplift.domain.CustomerData;
+import org.example.monetide.uplift.domain.Customer;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -9,7 +9,7 @@ import java.util.List;
 
 @Service
 public class EligibilityService {
-    public List<CustomerData> eligibleCustomers(List<CustomerData> customers) {
+    public List<Customer> eligibleCustomers(List<Customer> customers) {
         return customers.stream()
                 .filter(this::isNotMissingCriticalData)
                 .filter(this::hasNoRecentPriceChange)
@@ -17,21 +17,21 @@ public class EligibilityService {
                 .toList();
     }
 
-    private boolean hasNoRecentPriceChange(CustomerData customerData) {
-        Double currentMonthlyRecurringRevenue = customerData.getMonthlyRecurringRevenue();
-        Double previousMonthlyRecurringRevenue = customerData.getPreviousMonthlyRecurringRevenue();
+    private boolean hasNoRecentPriceChange(Customer customer) {
+        Double currentMonthlyRecurringRevenue = customer.getMonthlyRecurringRevenue();
+        Double previousMonthlyRecurringRevenue = customer.getPreviousMonthlyRecurringRevenue();
         return currentMonthlyRecurringRevenue.equals(previousMonthlyRecurringRevenue);
     }
 
-    private boolean hasSubscriptionOverOneYear(CustomerData customerData) {
+    private boolean hasSubscriptionOverOneYear(Customer customer) {
         Instant now = Instant.now();
-        Duration duration = Duration.between(customerData.getInitialSubscriptionDate(), now);
+        Duration duration = Duration.between(customer.getInitialSubscriptionDate(), now);
         return duration.toDays() > 365;
     }
 
-    private boolean isNotMissingCriticalData(CustomerData customerData) {
-        if (customerData.getInitialSubscriptionDate() == null) {
-            System.out.println("Customer has no initial subscription date: " + customerData.getAccountName());
+    private boolean isNotMissingCriticalData(Customer customer) {
+        if (customer.getInitialSubscriptionDate() == null) {
+            System.out.println("Customer has no initial subscription date: " + customer.getAccountName());
             return false;
         }
 

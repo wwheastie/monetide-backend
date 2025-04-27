@@ -2,7 +2,7 @@ package org.example.monetide.uplift.service;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import org.example.monetide.uplift.domain.Cohort;
-import org.example.monetide.uplift.domain.CustomerData;
+import org.example.monetide.uplift.domain.Customer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +20,7 @@ public class CohortService {
         this.cache = cache;
     }
 
-    public List<Cohort> groupCustomersByCohort(UUID customerId, List<CustomerData> customerData) {
+    public List<Cohort> groupCustomersByCohort(UUID customerId, List<Customer> customerData) {
         List<Cohort> cohorts = new ArrayList<>();
         cohorts.add(groupHighUsageLowPricedCustomers(customerData));
         cohorts.add(groupEnterpriseCustomersLegacyPricing(customerData));
@@ -33,26 +33,26 @@ public class CohortService {
         return cohorts;
     }
 
-    private List<Cohort> groupDuplicateAndMissingCustomers(List<Cohort> cohorts, List<CustomerData> allCustomers) {
-        Set<CustomerData> duplicateCustomersGlobal = new HashSet<>();
-        Set<CustomerData> allCohortCustomers = new HashSet<>();
+    private List<Cohort> groupDuplicateAndMissingCustomers(List<Cohort> cohorts, List<Customer> allCustomers) {
+        Set<Customer> duplicateCustomersGlobal = new HashSet<>();
+        Set<Customer> allCohortCustomers = new HashSet<>();
 
         for (int i = 0; i < cohorts.size(); i++) {
             Cohort cohort = cohorts.get(i);
-            Set<CustomerData> currentCustomerDataSet = new HashSet<>(cohort.getCustomers());
-            allCohortCustomers.addAll(currentCustomerDataSet);
+            Set<Customer> currentCustomerSet = new HashSet<>(cohort.getCustomers());
+            allCohortCustomers.addAll(currentCustomerSet);
 
-            Set<CustomerData> otherElements = new HashSet<>();
+            Set<Customer> otherElements = new HashSet<>();
             for (int j = 0; j < cohorts.size(); j++) {
                 if (i != j) {
                     otherElements.addAll(cohorts.get(j).getCustomers());
                 }
             }
 
-            Set<CustomerData> uniqueToCurrent = new HashSet<>(currentCustomerDataSet);
+            Set<Customer> uniqueToCurrent = new HashSet<>(currentCustomerSet);
             uniqueToCurrent.removeAll(otherElements);
 
-            Set<CustomerData> duplicatesInCurrent = new HashSet<>(currentCustomerDataSet);
+            Set<Customer> duplicatesInCurrent = new HashSet<>(currentCustomerSet);
             duplicatesInCurrent.retainAll(otherElements);
 
             duplicateCustomersGlobal.addAll(duplicatesInCurrent);
@@ -61,7 +61,7 @@ public class CohortService {
         }
 
         // Calculate customers not in any cohort
-        Set<CustomerData> allCustomerSet = new HashSet<>(allCustomers);
+        Set<Customer> allCustomerSet = new HashSet<>(allCustomers);
         allCustomerSet.removeAll(allCohortCustomers);
 
         // Create cohort for duplicate customers
@@ -84,10 +84,10 @@ public class CohortService {
     }
 
 
-    private Cohort groupMidTierCustomersWithExpansionPotential(List<CustomerData> customerData) {
-        List<CustomerData> filteredCustomers = customerData.stream()
+    private Cohort groupMidTierCustomersWithExpansionPotential(List<Customer> customerData) {
+        List<Customer> filteredCustomers = customerData.stream()
                 .filter(data -> MID_SEGMENT.equals(data.getSegment()))
-                .sorted(Comparator.comparing(CustomerData::getNumberOfUsers).reversed())
+                .sorted(Comparator.comparing(Customer::getUsers).reversed())
                 .toList();
 
 
@@ -99,16 +99,16 @@ public class CohortService {
                 .build();
     }
 
-    private Cohort groupPriceSensitiveLowUsageCustomers(List<CustomerData> customerData) {
-        List<CustomerData> monthlyCustomers = customerData.stream()
+    private Cohort groupPriceSensitiveLowUsageCustomers(List<Customer> customerData) {
+        List<Customer> monthlyCustomers = customerData.stream()
                 .filter(data -> "Monthly".equals(data.getBillingFrequency()))
-                .sorted(Comparator.comparing(CustomerData::getLogins))
+                .sorted(Comparator.comparing(Customer::getLogins))
                 .toList();
-        HashSet<CustomerData> monthlyCustomerSet = new HashSet<>(monthlyCustomers);
+        HashSet<Customer> monthlyCustomerSet = new HashSet<>(monthlyCustomers);
 
-        List<CustomerData> bottomHalfOfLogins = getBottomHalfOfLogins(customerData);
+        List<Customer> bottomHalfOfLogins = getBottomHalfOfLogins(customerData);
 
-        List<CustomerData> priceSensitiveCustomers = bottomHalfOfLogins.stream()
+        List<Customer> priceSensitiveCustomers = bottomHalfOfLogins.stream()
                 .filter(monthlyCustomerSet::contains)
                 .toList();
 
@@ -121,20 +121,20 @@ public class CohortService {
                 .build();
     }
 
-    private List<CustomerData> getBottomHalfOfLogins(List<CustomerData> customerData) {
+    private List<Customer> getBottomHalfOfLogins(List<Customer> customerData) {
         int median = customerData.size() / 2;
 
         return customerData.stream()
-                .sorted(Comparator.comparing(CustomerData::getLogins))
+                .sorted(Comparator.comparing(Customer::getLogins))
                 .toList()
                 .subList(0, median);
     }
 
-    private Cohort groupEnterpriseCustomersLegacyPricing(List<CustomerData> customerData) {
-        List<CustomerData> filteredCustomerData = customerData.stream()
+    private Cohort groupEnterpriseCustomersLegacyPricing(List<Customer> customerData) {
+        List<Customer> filteredCustomerData = customerData.stream()
                 .filter(data -> ENTERPRISE_CUSTOMER.equals(data.getSegment()))
-                .filter(data -> data.getNumberOfUsers() > 0)
-                .filter(data -> data.getMonthlyRecurringRevenue() / data.getNumberOfUsers() < MAX_PUPM)
+                .filter(data -> data.getUsers() > 0)
+                .filter(data -> data.getMonthlyRecurringRevenue() / data.getUsers() < MAX_PUPM)
                 .toList();
 
         return Cohort.builder()
@@ -145,13 +145,13 @@ public class CohortService {
                 .build();
     }
 
-    private Cohort groupHighUsageLowPricedCustomers(List<CustomerData> customerData) {
-        List<CustomerData> bottomCustomersByMRR = getBottomFiftyPercentOfMRR(customerData);
-        List<CustomerData> topCustomersByLogins = getTopFiftyPercentOfLogins(customerData);
-        HashSet<CustomerData> hashSet = new HashSet<>(bottomCustomersByMRR);
-        List<CustomerData> filteredCustomers = topCustomersByLogins.stream()
+    private Cohort groupHighUsageLowPricedCustomers(List<Customer> customerData) {
+        List<Customer> bottomCustomersByMRR = getBottomFiftyPercentOfMRR(customerData);
+        List<Customer> topCustomersByLogins = getTopFiftyPercentOfLogins(customerData);
+        HashSet<Customer> hashSet = new HashSet<>(bottomCustomersByMRR);
+        List<Customer> filteredCustomers = topCustomersByLogins.stream()
                 .filter(hashSet::contains)
-                .sorted(Comparator.comparing(CustomerData::getEngagementCostRatio).reversed())
+                .sorted(Comparator.comparing(Customer::getEngagementCostRatio).reversed())
                 .toList();
 
         return Cohort.builder()
@@ -162,20 +162,20 @@ public class CohortService {
                 .build();
     }
 
-    private List<CustomerData> getBottomFiftyPercentOfMRR(List<CustomerData> customerData) {
+    private List<Customer> getBottomFiftyPercentOfMRR(List<Customer> customerData) {
         int median = customerData.size() / 2;
 
         return customerData.stream()
-                .sorted(Comparator.comparing(CustomerData::getMonthlyRecurringRevenue))
+                .sorted(Comparator.comparing(Customer::getMonthlyRecurringRevenue))
                 .toList()
                 .subList(0, median);
     }
 
-    private List<CustomerData> getTopFiftyPercentOfLogins(List<CustomerData> customerData) {
+    private List<Customer> getTopFiftyPercentOfLogins(List<Customer> customerData) {
         int median = customerData.size() / 2;
 
         return customerData.stream()
-                .sorted(Comparator.comparing(CustomerData::getLogins).reversed())
+                .sorted(Comparator.comparing(Customer::getLogins).reversed())
                 .toList()
                 .subList(0, median);
     }
