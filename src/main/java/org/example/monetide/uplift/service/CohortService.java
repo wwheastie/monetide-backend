@@ -26,27 +26,22 @@ public class CohortService {
         cohorts.add(groupEnterpriseCustomersLegacyPricing(customerData));
         cohorts.add(groupMidTierCustomersWithExpansionPotential(customerData));
         cohorts.add(groupPriceSensitiveLowUsageCustomers(customerData));
-        cohorts.add(calculateUniqueAndDuplicateCustomers(cohorts));
+        cohorts.addAll(groupDuplicateAndMissingCustomers(cohorts, customerData));
 
         cache.put(customerId, cohorts);
 
         return cohorts;
     }
 
-    private Cohort groupCustomersInMultipleCohorts(List<Cohort> cohorts) {
-        return null;
-    }
-
-    private Cohort calculateUniqueAndDuplicateCustomers(List<Cohort> cohorts) {
-        // Global set to store customers that appear in multiple cohorts
+    private List<Cohort> groupDuplicateAndMissingCustomers(List<Cohort> cohorts, List<CustomerData> allCustomers) {
         Set<CustomerData> duplicateCustomersGlobal = new HashSet<>();
+        Set<CustomerData> allCohortCustomers = new HashSet<>();
 
         for (int i = 0; i < cohorts.size(); i++) {
             Cohort cohort = cohorts.get(i);
-            // Convert current cohort customers into a set to ensure uniqueness and enable set operations
             Set<CustomerData> currentCustomerDataSet = new HashSet<>(cohort.getCustomers());
+            allCohortCustomers.addAll(currentCustomerDataSet);
 
-            // Gather customers from all other cohorts
             Set<CustomerData> otherElements = new HashSet<>();
             for (int j = 0; j < cohorts.size(); j++) {
                 if (i != j) {
@@ -54,33 +49,38 @@ public class CohortService {
                 }
             }
 
-            // Compute customers that are unique to the current cohort
             Set<CustomerData> uniqueToCurrent = new HashSet<>(currentCustomerDataSet);
             uniqueToCurrent.removeAll(otherElements);
 
-            // Compute customers that appear in both the current cohort and at least one other cohort (duplicates)
             Set<CustomerData> duplicatesInCurrent = new HashSet<>(currentCustomerDataSet);
             duplicatesInCurrent.retainAll(otherElements);
 
-            // Optionally, if your Cohort class supports it, you could save duplicates directly on the cohort.
-            // For example: cohort.setDuplicateCustomers(duplicatesInCurrent);
-
-            // Add the duplicates from the current cohort to the global set
             duplicateCustomersGlobal.addAll(duplicatesInCurrent);
 
-            // Update the cohort with the count of unique customers
             cohort.setUniqueCustomerCount(uniqueToCurrent.size());
         }
 
-        // Now duplicateCustomersGlobal contains all customers found in more than one cohort.
-        System.out.println("Global Duplicate Customers: " + duplicateCustomersGlobal);
+        // Calculate customers not in any cohort
+        Set<CustomerData> allCustomerSet = new HashSet<>(allCustomers);
+        allCustomerSet.removeAll(allCohortCustomers);
 
-        return Cohort.builder()
-                .name("Customer in Multiple Cohorts")
-                .description("This cohort shows all customers in that are in multiple cohorts")
-                .shortDescription("Customers in more than one cohort")
+        // Create cohort for duplicate customers
+        Cohort duplicateCohort = Cohort.builder()
+                .name("Customers in Multiple Cohorts")
+                .description("Customers appearing in more than one cohort")
+                .shortDescription("Duplicate cohort customers")
                 .customers(new ArrayList<>(duplicateCustomersGlobal))
                 .build();
+
+        // Create cohort for customers not in any cohort
+        Cohort missingCohort = Cohort.builder()
+                .name("Customers Not in Any Cohort")
+                .description("These customers do not belong to any cohort")
+                .shortDescription("Unassigned customers")
+                .customers(new ArrayList<>(allCustomerSet))
+                .build();
+
+        return List.of(duplicateCohort, missingCohort);
     }
 
 
