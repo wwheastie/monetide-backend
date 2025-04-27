@@ -54,7 +54,7 @@ public class ScoreService {
 
     private String determineBucket(Customer customer) {
         Double engagementScore = customer.getAdoptionScore();
-        Double valueScore = customer.getMonthlyRecurringRevenue();
+        Double valueScore = customer.getMrrScore();
 
         if (engagementScore >= 0.66 && valueScore >= 0.66) {
             return "Engaged High-Value";

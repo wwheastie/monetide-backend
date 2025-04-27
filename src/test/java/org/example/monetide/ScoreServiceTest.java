@@ -36,6 +36,21 @@ public class ScoreServiceTest {
         assertEquals(0.9312214962, customer.getMrrScore());
     }
 
+    @Test
+    public void testAssignBucket() {
+        List<Customer> customers = getCustomers();
+        ScoreService scoreService = new ScoreService();
+        scoreService.calculateAdoptionsScore(customers);
+        scoreService.calculateMRRScores(customers);
+        scoreService.assignBucket(customers);
+        Customer customer = customers.stream()
+                .filter(c -> c.getAccountName().equals("HyperNet Enterprises"))
+                .findFirst()
+                .get();
+        assertNotNull(customer);
+        assertEquals("Moderate Mid-Value", customer.getBucketName());
+    }
+
     private List<Customer> getCustomers() {
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("customer-data.csv");
         CsvService csvService = new CsvService();
