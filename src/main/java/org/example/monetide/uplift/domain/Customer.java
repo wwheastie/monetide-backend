@@ -60,11 +60,9 @@ public class Customer {
 
     // Usage Metrics
     @CsvCustomBindByName(column = "Total Logins (90-Days)", converter = IntegerConverter.class)
-    @JsonIgnore
     private Integer logins;
 
     @CsvCustomBindByName(column = "# of Users", converter = IntegerConverter.class)
-    @JsonIgnore
     private Integer users;
 
     @CsvCustomBindByName(column = "First Subscription Date", converter = DateConverter.class)
