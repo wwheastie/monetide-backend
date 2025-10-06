@@ -25,28 +25,29 @@ public class LoginController {
 
     @PostMapping("/api/v1/login")
     public ResponseEntity<LoginResponse> login(@RequestBody Login login) {
-        // Set up the headers
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("apikey", apiKey);
+        return ResponseEntity.ok();
+        // // Set up the headers
+        // HttpHeaders headers = new HttpHeaders();
+        // headers.setContentType(MediaType.APPLICATION_JSON);
+        // headers.set("apikey", apiKey);
 
-        // Create the request body
-        HttpEntity<Login> requestEntity = new HttpEntity<>(login, headers);
+        // // Create the request body
+        // HttpEntity<Login> requestEntity = new HttpEntity<>(login, headers);
 
-        // Send the POST request to Supabase
-        ResponseEntity<SupabaseLoginResponse> responseEntity = restTemplate.exchange(
-                "https://bwlvbzmgfqauuqynxevi.supabase.co/auth/v1/token?grant_type=password",
-                HttpMethod.POST,
-                requestEntity,
-                SupabaseLoginResponse.class);
+        // // Send the POST request to Supabase
+        // ResponseEntity<SupabaseLoginResponse> responseEntity = restTemplate.exchange(
+        //         "https://bwlvbzmgfqauuqynxevi.supabase.co/auth/v1/token?grant_type=password",
+        //         HttpMethod.POST,
+        //         requestEntity,
+        //         SupabaseLoginResponse.class);
 
-        SupabaseLoginResponse supabaseLoginResponse = responseEntity.getBody();
+        // SupabaseLoginResponse supabaseLoginResponse = responseEntity.getBody();
 
-        LoginResponse loginResponse = LoginResponse.builder()
-                .token(Objects.requireNonNull(supabaseLoginResponse).getToken())
-                .customerId(supabaseLoginResponse.getUser().getId())
-                .build();
+        // LoginResponse loginResponse = LoginResponse.builder()
+        //         .token(Objects.requireNonNull(supabaseLoginResponse).getToken())
+        //         .customerId(supabaseLoginResponse.getUser().getId())
+        //         .build();
 
-        return ResponseEntity.ok(loginResponse);
+        // return ResponseEntity.ok(loginResponse);
     }
 }
