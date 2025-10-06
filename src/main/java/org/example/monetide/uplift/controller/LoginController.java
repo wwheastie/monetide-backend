@@ -25,7 +25,7 @@ public class LoginController {
 
     @PostMapping("/api/v1/login")
     public ResponseEntity<LoginResponse> login(@RequestBody Login login) {
-        return ResponseEntity.ok();
+        return ResponseEntity.ok().build();
         // // Set up the headers
         // HttpHeaders headers = new HttpHeaders();
         // headers.setContentType(MediaType.APPLICATION_JSON);
